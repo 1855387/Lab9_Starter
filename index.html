@@ -86,8 +86,20 @@
       <button>Trigger a Global Error</button>
     </section>
   </main>
-
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+    <script>
+    window.TrackJS && TrackJS.install({ 
+        token: "96fa81cc9cae45d0bfa770348a0de238"
+        // for more configuration options, see https://docs.trackjs.com
+    });
+    </script>
   <script>
+    class CalculationError extends Error {
+        constructor(message) {
+        super(message);
+        this.name = "CalculationError";
+        }
+    }
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
@@ -96,12 +108,156 @@
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
       output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+
+    try {
+      const num1 = parseFloat(firstNum);
+      const num2 = parseFloat(secondNum);
+
+      if (isNaN(num1) || isNaN(num2)) {
+        throw new CalculationError("Both inputs must be valid numbers.");
+      }
+
+      if (operator === "/" && num2 === 0) {
+        throw new CalculationError("You can't divide by zero!");
+      }
+
+      const result = eval(`${num1} ${operator} ${num2}`);
+      output.innerHTML = `Result: ${result}`;
+      console.log("Calculation completed successfully.");
+
+    } catch (err) {
+      if (err instanceof CalculationError) {
+        console.error(`[CalculationError] ${err.message}`);
+        output.innerHTML = `Error: ${err.message}`;
+      } else {
+        console.error("Unexpected error:", err);
+        output.innerHTML = "Unexpected error occurred.";
+      }
+    }
     });
+
+    window.onerror = function () {
+        console.log("Global error caught!");
+    };
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
 
     // Start your code here
     // You may move this JS to another file if you wish
+
+    let count = 0;
+    const sampleData = [
+        { name: "Thomas", age: 25 },
+        { name: "Powell", age: 30 },
+    ];
+
+    errorBtns.forEach((btn) => {
+    const text = btn.textContent;
+        switch (text) {
+            case 'Console Log':
+            btn.addEventListener('click', () => {
+                console.log('This is a console.log message');
+            });
+            break;
+
+            case 'Console Error':
+            btn.addEventListener('click', () => {
+                console.error('This is a console.error message');
+            });
+            break;
+
+            case 'Console Count':
+            btn.addEventListener('click', () => {
+                console.count('Console Count');
+            });
+            break;
+
+            case 'Console Warn':
+            btn.addEventListener('click', () => {
+                console.warn('This is a console.warn message');
+            });
+            break;
+
+            case 'Console Assert':
+            btn.addEventListener('click', () => {
+                const isFalse = false;
+                console.assert(isFalse, 'Assertion failed: isFalse was expected to be true');
+            });
+            break;
+
+            case 'Console Clear':
+            btn.addEventListener('click', () => {
+                console.clear();
+            });
+            break;
+
+            case 'Console Dir':
+            btn.addEventListener('click', (e) => {
+                console.dir(e.currentTarget);
+            });
+            break;
+
+            case 'Console dirxml':
+            btn.addEventListener('click', (e) => {
+                console.dirxml(e.currentTarget);
+            });
+            break;
+
+            case 'Console Group Start':
+            btn.addEventListener('click', () => {
+                console.group('Grouped Messages');
+            });
+            break;
+
+            case 'Console Group End':
+            btn.addEventListener('click', () => {
+                console.groupEnd();
+            });
+            break;
+
+            case 'Console Table':
+            btn.addEventListener('click', () => {
+                console.table(sampleData);
+            });
+            break;
+
+            case 'Start Timer':
+            btn.addEventListener('click', () => {
+                console.time('Timer');
+            });
+            break;
+
+            case 'End Timer':
+            btn.addEventListener('click', () => {
+                console.timeEnd('Timer');
+            });
+            break;
+            
+            case 'Console Trace':
+            btn.addEventListener('click', () => {
+                function deep() {
+                    deeper();
+                }
+
+                function deeper() {
+                    deepest();
+                }
+
+                function deepest() {
+                    console.trace("Trace from deepest()");
+                }
+                deep();
+            });
+            break;
+
+            case 'Trigger a Global Error':
+                btn.addEventListener('click', () => {
+                    nonExistent();
+            });
+            break;
+
+        }
+    });
   </script>
 </body>
 
